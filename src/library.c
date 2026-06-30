@@ -94,7 +94,6 @@ void library_free(Library *lib) {
 void library_cli(const char *book_file) {
     Library lib;
     int running = 1;
-    int choice;
 
     printf("\n========================================\n");
     printf("   C Library Management System v1.0\n");
@@ -112,7 +111,7 @@ void library_cli(const char *book_file) {
         printf("  2  Librarian login\n");
         printf("  3  Exit\n");
         printf("Choice: ");
-        choice = util_read_option();
+        int choice = util_read_option();
 
         switch (choice) {
         case 1:

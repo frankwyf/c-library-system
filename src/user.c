@@ -90,30 +90,29 @@ int user_borrow_book(User *user, Book *book_list, int num_books,
 
 int user_return_book(User *user) {
     int idx;
-    const char *author, *title;
     user_list_borrowed(user);
     idx = util_read_index("  Enter book number to return: ");
     if (idx < 0) {
         printf("Error: invalid input.\n");
         return LIB_ERR;
     }
-    /* Cache name before the slot is cleared */
-    if (idx >= 0 && idx < user->num_borrowed) {
-        author = user->borrowed[idx]->author;
-        title  = user->borrowed[idx]->title;
-        if (user_do_return(user, idx) == LIB_OK) {
-            printf("  Returned: %s – %s\n", author, title);
-            return LIB_OK;
-        }
-    } else {
+    if (idx >= user->num_borrowed) {
         printf("Error: invalid input.\n");
+        return LIB_ERR;
+    }
+
+    /* Cache the name before user_do_return clears the slot. */
+    const char *author = user->borrowed[idx]->author;
+    const char *title  = user->borrowed[idx]->title;
+    if (user_do_return(user, idx) == LIB_OK) {
+        printf("  Returned: %s – %s\n", author, title);
+        return LIB_OK;
     }
     return LIB_ERR;
 }
 
 void user_cli(Library *lib) {
     int running = 1;
-    int choice;
 
     while (running) {
         printf("\n--- User Menu ---\n");
@@ -123,7 +122,7 @@ void user_cli(Library *lib) {
         printf("  4  My borrowed books\n");
         printf("  5  Log out\n");
         printf("Choice: ");
-        choice = util_read_option();
+        int choice = util_read_option();
 
         switch (choice) {
         case 1:

@@ -103,7 +103,6 @@ int librarian_remove_book(Library *lib) {
 
 void librarian_cli(Library *lib) {
     int running = 1;
-    int choice;
 
     while (running) {
         printf("\n--- Librarian Menu ---\n");
@@ -113,7 +112,7 @@ void librarian_cli(Library *lib) {
         printf("  4  Remove book\n");
         printf("  5  Log out\n");
         printf("Choice: ");
-        choice = util_read_option();
+        int choice = util_read_option();
 
         switch (choice) {
         case 1:
