@@ -1,0 +1,17 @@
+# CODEOWNERS — default reviewers for all pull requests.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global fallback — all files
+*       @frankwyf
+
+# CI / build system
+.github/    @frankwyf
+CMakeLists.txt  @frankwyf
+Makefile        @frankwyf
+Dockerfile      @frankwyf
+
+# Source code
+src/    @frankwyf
+
+# Tests
+tests/  @frankwyf
