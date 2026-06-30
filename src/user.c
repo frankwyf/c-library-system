@@ -9,8 +9,8 @@ void user_list_available(const Book *book_list, int num_books) {
     int i, found = 0;
     for (i = 0; i < num_books; i++) {
         if (!book_list[i].is_borrowed) {
-            printf("  [%2d] %-40s  %s\n",
-                   i, book_list[i].author, book_list[i].title);
+            printf("  [%2d] %-40s  %s\n", i, book_list[i].author,
+                   book_list[i].title);
             found++;
         }
     }
@@ -25,15 +25,13 @@ void user_list_borrowed(const User *user) {
         return;
     }
     for (i = 0; i < user->num_borrowed; i++) {
-        printf("  [%d] %-40s  %s\n",
-               i,
-               user->borrowed[i]->author,
+        printf("  [%d] %-40s  %s\n", i, user->borrowed[i]->author,
                user->borrowed[i]->title);
     }
 }
 
-int user_do_borrow(User *user, Book *book_list,
-                   int num_books, int max_borrowed, int book_idx) {
+int user_do_borrow(User *user, Book *book_list, int num_books, int max_borrowed,
+                   int book_idx) {
     if (user->num_borrowed >= max_borrowed) {
         printf("Error: return a book before borrowing another.\n");
         return LIB_ERR;
@@ -46,8 +44,8 @@ int user_do_borrow(User *user, Book *book_list,
         printf("Error: that book is not available.\n");
         return LIB_ERR;
     }
-    book_list[book_idx].is_borrowed          = 1;
-    user->borrowed[user->num_borrowed]       = &book_list[book_idx];
+    book_list[book_idx].is_borrowed    = 1;
+    user->borrowed[user->num_borrowed] = &book_list[book_idx];
     user->num_borrowed++;
     return LIB_OK;
 }
@@ -72,8 +70,8 @@ int user_do_return(User *user, int borrow_idx) {
     return LIB_OK;
 }
 
-int user_borrow_book(User *user, Book *book_list,
-                     int num_books, int max_borrowed) {
+int user_borrow_book(User *user, Book *book_list, int num_books,
+                     int max_borrowed) {
     int idx;
     user_list_available(book_list, num_books);
     idx = util_read_index("  Enter book number to borrow: ");
@@ -81,9 +79,10 @@ int user_borrow_book(User *user, Book *book_list,
         printf("Error: invalid input.\n");
         return LIB_ERR;
     }
-    if (user_do_borrow(user, book_list, num_books, max_borrowed, idx) == LIB_OK) {
-        printf("  Borrowed: %s – %s\n",
-               book_list[idx].author, book_list[idx].title);
+    if (user_do_borrow(user, book_list, num_books, max_borrowed, idx) ==
+        LIB_OK) {
+        printf("  Borrowed: %s – %s\n", book_list[idx].author,
+               book_list[idx].title);
         return LIB_OK;
     }
     return LIB_ERR;
@@ -133,8 +132,8 @@ void user_cli(Library *lib) {
             break;
         case 2:
             printf("\n[Borrow a book]\n");
-            user_borrow_book(&lib->the_user, lib->book_list,
-                             lib->num_books, lib->max_borrowed);
+            user_borrow_book(&lib->the_user, lib->book_list, lib->num_books,
+                             lib->max_borrowed);
             break;
         case 3:
             printf("\n[Return a book]\n");

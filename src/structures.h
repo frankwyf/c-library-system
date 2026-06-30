@@ -2,22 +2,22 @@
 #define LIB_STRUCTURES_H
 
 /* String buffer sizes */
-#define MAX_TITLE_LEN    64
-#define MAX_AUTHOR_LEN   64
+#define MAX_TITLE_LEN 64
+#define MAX_AUTHOR_LEN 64
 #define MAX_USERNAME_LEN 32
 
 /* Capacity defaults — override at compile time with -DMAX_BOOKS=N */
 #ifndef MAX_BOOKS
-#  define MAX_BOOKS    64
+#define MAX_BOOKS 64
 #endif
 
 #ifndef MAX_BORROWED
-#  define MAX_BORROWED  4
+#define MAX_BORROWED 4
 #endif
 
 /* Return codes */
-#define LIB_OK    0
-#define LIB_ERR  (-1)
+#define LIB_OK 0
+#define LIB_ERR (-1)
 
 /*
  * Book — a single catalogue entry.
@@ -26,7 +26,7 @@
 typedef struct {
     char title[MAX_TITLE_LEN];
     char author[MAX_AUTHOR_LEN];
-    int  is_borrowed;
+    int is_borrowed;
 } Book;
 
 /*
@@ -35,9 +35,9 @@ typedef struct {
  * so mutations are reflected in the catalogue immediately.
  */
 typedef struct {
-    char  username[MAX_USERNAME_LEN];
+    char username[MAX_USERNAME_LEN];
     Book *borrowed[MAX_BORROWED];
-    int   num_borrowed;
+    int num_borrowed;
 } User;
 
 /*
@@ -45,11 +45,11 @@ typedef struct {
  * book_list is heap-allocated by library_init() and freed by library_free().
  */
 typedef struct {
-    Book *book_list;    /* heap-allocated array of Book    */
-    int   num_books;    /* current catalogue size           */
-    int   max_books;    /* allocated capacity               */
-    User  the_user;     /* active user session              */
-    int   max_borrowed; /* borrow limit per user            */
+    Book *book_list;  /* heap-allocated array of Book    */
+    int num_books;    /* current catalogue size           */
+    int max_books;    /* allocated capacity               */
+    User the_user;    /* active user session              */
+    int max_borrowed; /* borrow limit per user            */
 } Library;
 
 #endif /* LIB_STRUCTURES_H */

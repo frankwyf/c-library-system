@@ -26,10 +26,10 @@ int librarian_do_remove(Library *lib, int idx);
 /* ---- Interactive wrappers ---- */
 
 /* Prompt for author/title, then call librarian_do_add(). */
-int  librarian_add_book(Library *lib);
+int librarian_add_book(Library *lib);
 
 /* List catalogue, prompt for index, then call librarian_do_remove(). */
-int  librarian_remove_book(Library *lib);
+int librarian_remove_book(Library *lib);
 
 /* Interactive menu loop for a librarian session. */
 void librarian_cli(Library *lib);

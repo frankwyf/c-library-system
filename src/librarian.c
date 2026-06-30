@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "structures.h"
 #include "librarian.h"
+#include "structures.h"
 #include "utility.h"
 
 void librarian_list_all(const Book *book_list, int num_books) {
@@ -13,8 +13,8 @@ void librarian_list_all(const Book *book_list, int num_books) {
         return;
     }
     for (i = 0; i < num_books; i++) {
-        printf("  [%2d] %-40s  %s\n",
-               i, book_list[i].author, book_list[i].title);
+        printf("  [%2d] %-40s  %s\n", i, book_list[i].author,
+               book_list[i].title);
     }
 }
 
@@ -22,8 +22,8 @@ void librarian_list_borrowed(const Book *book_list, int num_books) {
     int i, found = 0;
     for (i = 0; i < num_books; i++) {
         if (book_list[i].is_borrowed) {
-            printf("  [%2d] %-40s  %s\n",
-                   i, book_list[i].author, book_list[i].title);
+            printf("  [%2d] %-40s  %s\n", i, book_list[i].author,
+                   book_list[i].title);
             found++;
         }
     }
@@ -40,7 +40,7 @@ int librarian_do_add(Library *lib, const char *author, const char *title) {
     b = &lib->book_list[lib->num_books];
     memset(b, 0, sizeof(Book));
     strncpy(b->author, author, MAX_AUTHOR_LEN - 1);
-    strncpy(b->title,  title,  MAX_TITLE_LEN  - 1);
+    strncpy(b->title, title, MAX_TITLE_LEN - 1);
     b->is_borrowed = 0;
     lib->num_books++;
     return LIB_OK;

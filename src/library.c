@@ -2,17 +2,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "structures.h"
-#include "library.h"
-#include "user.h"
 #include "librarian.h"
+#include "library.h"
+#include "structures.h"
+#include "user.h"
 #include "utility.h"
 
 /* ------------------------------------------------------------------ */
 
 int library_init(const char *book_file, Library *lib) {
     FILE *fp;
-    int   count;
+    int count;
 
     lib->max_books    = MAX_BOOKS;
     lib->max_borrowed = MAX_BORROWED;
@@ -48,30 +48,31 @@ int library_init(const char *book_file, Library *lib) {
 
 int library_read_books(FILE *fp, Book *book_list, int max_books) {
     char line[128];
-    int  count = 0;
-    int  row   = 0; /* 0 = expecting author line, 1 = expecting title line */
+    int count = 0;
+    int row   = 0; /* 0 = expecting author line, 1 = expecting title line */
 
     while (fgets(line, (int)sizeof(line), fp) != NULL) {
         util_trim_newline(line);
 
-        if (line[0] == '\0')   /* skip blank separator lines */
+        if (line[0] == '\0') /* skip blank separator lines */
             continue;
 
         if (count >= max_books) {
-            fprintf(stderr,
-                    "Warning: catalogue full (%d entries), extra books ignored\n",
-                    max_books);
+            fprintf(
+                stderr,
+                "Warning: catalogue full (%d entries), extra books ignored\n",
+                max_books);
             break;
         }
 
         if (row == 0) {
             strncpy(book_list[count].author, line, MAX_AUTHOR_LEN - 1);
             book_list[count].author[MAX_AUTHOR_LEN - 1] = '\0';
-            row = 1;
+            row                                         = 1;
         } else {
             strncpy(book_list[count].title, line, MAX_TITLE_LEN - 1);
             book_list[count].title[MAX_TITLE_LEN - 1] = '\0';
-            book_list[count].is_borrowed = 0;
+            book_list[count].is_borrowed              = 0;
             count++;
             row = 0;
         }
@@ -83,7 +84,8 @@ int library_read_books(FILE *fp, Book *book_list, int max_books) {
 void library_free(Library *lib) {
     if (!lib)
         return;
-    memset(&lib->the_user, 0, sizeof(User)); /* clear dangling borrowed[] ptrs */
+    memset(&lib->the_user, 0,
+           sizeof(User)); /* clear dangling borrowed[] ptrs */
     free(lib->book_list);
     lib->book_list = NULL;
     lib->num_books = 0;
@@ -91,8 +93,8 @@ void library_free(Library *lib) {
 
 void library_cli(const char *book_file) {
     Library lib;
-    int     running = 1;
-    int     choice;
+    int running = 1;
+    int choice;
 
     printf("\n========================================\n");
     printf("   C Library Management System v1.0\n");

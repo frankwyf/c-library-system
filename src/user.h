@@ -13,10 +13,11 @@ void user_list_borrowed(const User *user);
 
 /*
  * Borrow the catalogue entry at index book_idx.
- * Returns LIB_ERR if: borrow limit reached, book_idx invalid, or already borrowed.
+ * Returns LIB_ERR if: borrow limit reached, book_idx invalid, or already
+ * borrowed.
  */
-int user_do_borrow(User *user, Book *book_list,
-                   int num_books, int max_borrowed, int book_idx);
+int user_do_borrow(User *user, Book *book_list, int num_books, int max_borrowed,
+                   int book_idx);
 
 /*
  * Return the book at borrow-list index borrow_idx.
@@ -28,8 +29,8 @@ int user_do_return(User *user, int borrow_idx);
 /* ---- Interactive wrappers ---- */
 
 /* List available books, prompt for catalogue index, call user_do_borrow(). */
-int user_borrow_book(User *user, Book *book_list,
-                     int num_books, int max_borrowed);
+int user_borrow_book(User *user, Book *book_list, int num_books,
+                     int max_borrowed);
 
 /* List borrowed books, prompt for borrow-list index, call user_do_return(). */
 int user_return_book(User *user);

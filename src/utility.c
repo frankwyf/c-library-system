@@ -1,6 +1,6 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
 
 #include "utility.h"
@@ -19,10 +19,10 @@ void util_trim_newline(char *s) {
 }
 
 int util_read_index(const char *prompt) {
-    char  line[80];
+    char line[80];
     char *end;
-    long  val;
-    int   i;
+    long val;
+    int i;
 
     printf("%s", prompt);
     fflush(stdout);
