@@ -1,0 +1,26 @@
+{
+  "name": "c-library-system",
+  "version": "1.0.0",
+  "repo": "frankwyf/c-library-system",
+  "description": "Console-based C99 library management system with borrowing, returns, and librarian administration",
+  "keywords": [
+    "library",
+    "management",
+    "console",
+    "cli",
+    "c99",
+    "books"
+  ],
+  "license": "MIT",
+  "src": [
+    "src/structures.h",
+    "src/library.h",
+    "src/library.c",
+    "src/librarian.h",
+    "src/librarian.c",
+    "src/user.h",
+    "src/user.c",
+    "src/utility.h",
+    "src/utility.c"
+  ]
+}

@@ -12,6 +12,12 @@ cmake_install.cmake
 CTestTestfile.cmake
 _deps/
 
+# Code coverage
+coverage.info
+coverage-html/
+*.gcno
+*.gcda
+
 # IDE / editor
 .vscode/
 .idea/

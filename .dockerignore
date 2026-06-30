@@ -1,0 +1,9 @@
+# Docker ignore — keep the build context lean
+build/
+coverage-html/
+coverage.info
+*.gcno
+*.gcda
+.git/
+.vscode/
+.idea/
