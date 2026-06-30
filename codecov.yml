@@ -1,0 +1,27 @@
+# Codecov configuration
+# https://docs.codecov.io/docs/codecov-yaml
+codecov:
+  require_ci_to_pass: true
+
+coverage:
+  precision: 2
+  round: down
+  range: "60...90"
+
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 2%    # allow 2% drop before failing
+    patch:
+      default:
+        target: 80%      # new code should be well-tested
+
+comment:
+  layout: "reach,diff,flags,files"
+  behavior: default
+  require_changes: false
+
+ignore:
+  - "src/main.c"        # entry point with interactive I/O
+  - "tests/**"

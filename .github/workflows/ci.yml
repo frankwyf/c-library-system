@@ -2,20 +2,26 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ master, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   # ---------------------------------------------------------------
-  # Build and test on multiple platforms
+  # Build and test — Linux, macOS, Windows
   # ---------------------------------------------------------------
   build-and-test:
-    name: Build & Test (${{ matrix.os }})
+    name: Build & Test (${{ matrix.label }})
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            label: Linux
+          - os: macos-latest
+            label: macOS
+          - os: windows-latest
+            label: Windows
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -30,6 +36,8 @@ jobs:
         if: runner.os == 'macOS'
         run: brew install cmake
 
+      # Windows: CMake + MSVC are pre-installed on windows-latest runners
+
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=Debug
 
@@ -40,58 +48,266 @@ jobs:
         run: ctest --test-dir build --output-on-failure -V
 
   # ---------------------------------------------------------------
-  # Static analysis with cppcheck
+  # Code coverage (gcov + lcov) — Linux only
   # ---------------------------------------------------------------
-  static-analysis:
-    name: Static Analysis
+  coverage:
+    name: Code Coverage
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake build-essential lcov
+
+      - name: Configure with coverage enabled
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE=ON
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Collect coverage data
+        run: |
+          lcov --capture \
+               --directory build \
+               --output-file coverage.info \
+               --ignore-errors inconsistent,inconsistent
+          lcov --remove coverage.info \
+               '*/unity/*' '*/tests/*' '/usr/*' \
+               --output-file coverage.info \
+               --ignore-errors unused
+          lcov --list coverage.info
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.info
+          fail_ci_if_error: false
+
+  # ---------------------------------------------------------------
+  # Memory check — Valgrind (Linux only)
+  # ---------------------------------------------------------------
+  valgrind:
+    name: Memory Check (Valgrind)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake build-essential valgrind
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Run test suites under Valgrind
+        run: |
+          for suite in library user librarian utility; do
+            echo "=== valgrind: test_${suite} ==="
+            valgrind \
+              --error-exitcode=1  \
+              --leak-check=full   \
+              --show-leak-kinds=all \
+              --track-origins=yes \
+              --quiet \
+              ./build/test_${suite}
+          done
+
+  # ---------------------------------------------------------------
+  # Sanitizers — ASan + UBSan (Linux only)
+  # ---------------------------------------------------------------
+  sanitizers:
+    name: Sanitizers (ASan + UBSan)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake build-essential
+
+      - name: Configure with ASan + UBSan
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DENABLE_ASAN=ON -DENABLE_UBSAN=ON
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Run tests under sanitizers
+        run: ctest --test-dir build --output-on-failure -V
+
+  # ---------------------------------------------------------------
+  # Static analysis — cppcheck
+  # ---------------------------------------------------------------
+  static-analysis:
+    name: Static Analysis (cppcheck)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Install cppcheck
         run: sudo apt-get update && sudo apt-get install -y cppcheck
 
       - name: Run cppcheck
         run: |
-          cppcheck --enable=warning,style,performance \
-                   --error-exitcode=1                 \
-                   --suppress=missingIncludeSystem    \
-                   -I src                             \
-                   src/
+          cppcheck \
+            --enable=warning,style,performance \
+            --error-exitcode=1                 \
+            --suppress=missingIncludeSystem    \
+            -I src                             \
+            src/
 
   # ---------------------------------------------------------------
-  # Release: triggered by version tags (e.g. v1.0.0)
+  # Format check — clang-format
+  # ---------------------------------------------------------------
+  format-check:
+    name: Format Check (clang-format)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+
+      - name: Check source formatting
+        run: |
+          find src tests -name '*.c' -o -name '*.h' \
+            | xargs clang-format --dry-run --Werror
+
+  # ---------------------------------------------------------------
+  # Docker — build image and run tests inside container
+  # ---------------------------------------------------------------
+  docker:
+    name: Docker Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build test stage
+        run: docker build --target test -t c-library-system:test .
+
+      - name: Build runtime image
+        run: docker build --target runtime -t c-library-system:latest .
+
+      - name: Smoke test runtime image
+        run: |
+          # Exit immediately (option 3) — verifies the binary runs and loads data
+          echo "3" | docker run --rm -i c-library-system:latest | grep -qi "goodbye"
+
+  # ---------------------------------------------------------------
+  # Integration smoke test (Linux)
+  # ---------------------------------------------------------------
+  smoke-test:
+    name: Integration Smoke Test
+    runs-on: ubuntu-latest
+    needs: [build-and-test]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake build-essential
+
+      - name: Build
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+          cmake --build build --parallel
+
+      - name: Run smoke test
+        run: |
+          chmod +x scripts/smoke-test.sh
+          ./scripts/smoke-test.sh ./build/library
+
+  # ---------------------------------------------------------------
+  # Release: binaries for Linux, macOS, and Windows on version tags
   # ---------------------------------------------------------------
   release:
-    name: Release (Linux binary)
-    runs-on: ubuntu-latest
+    name: Release — ${{ matrix.label }}
     needs: [build-and-test, static-analysis]
     if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: Linux x86_64
+            suffix: linux-x86_64
+            ext: tar.gz
+          - os: macos-latest
+            label: macOS
+            suffix: macos
+            ext: tar.gz
+          - os: windows-latest
+            label: Windows x64
+            suffix: windows-x64
+            ext: zip
+    runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y cmake build-essential
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install cmake
 
       - name: Build release binary
         run: |
           cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
           cmake --build build --parallel
 
-      - name: Create archive
+      - name: Stage artefacts (Linux / macOS)
+        if: runner.os != 'Windows'
         run: |
           mkdir -p dist
-          cp build/library dist/
+          find build -maxdepth 2 -name 'library' -not -name '*.cmake' \
+            | head -1 | xargs -I{} cp {} dist/
           cp -r data dist/
           cp README.md LICENSE dist/
-          tar -czf c-library-system-${{ github.ref_name }}-linux-x86_64.tar.gz -C dist .
+          TAG="${{ github.ref_name }}"
+          ARCHIVE="c-library-system-${TAG}-${{ matrix.suffix }}.${{ matrix.ext }}"
+          tar -czf "${ARCHIVE}" -C dist .
+          echo "ARCHIVE=${ARCHIVE}" >> "$GITHUB_ENV"
 
-      - name: Publish release
+      - name: Stage artefacts (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist
+          $exe = Get-ChildItem -Recurse build -Filter 'library.exe' |
+                 Where-Object { $_.DirectoryName -notmatch 'unity' } |
+                 Select-Object -First 1
+          Copy-Item $exe.FullName dist\
+          Copy-Item -Recurse data dist\
+          Copy-Item README.md, LICENSE dist\
+          $tag  = "${{ github.ref_name }}"
+          $arch = "c-library-system-${tag}-${{ matrix.suffix }}.${{ matrix.ext }}"
+          Compress-Archive -Path dist\* -DestinationPath $arch
+          "ARCHIVE=$arch" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Publish to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: c-library-system-*.tar.gz
+          files: ${{ env.ARCHIVE }}
           generate_release_notes: true
