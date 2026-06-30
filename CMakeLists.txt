@@ -15,6 +15,39 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+# Code-coverage instrumentation (Linux / macOS only)
+option(ENABLE_COVERAGE "Enable gcov/lcov code coverage" OFF)
+if(ENABLE_COVERAGE)
+    if(NOT CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+        message(FATAL_ERROR "ENABLE_COVERAGE requires GCC or Clang")
+    endif()
+    add_compile_options(--coverage -O0 -fprofile-arcs -ftest-coverage)
+    add_link_options(--coverage)
+endif()
+
+# AddressSanitizer (ASan) — detect memory errors at runtime
+option(ENABLE_ASAN "Enable AddressSanitizer (GCC/Clang)" OFF)
+if(ENABLE_ASAN)
+    if(NOT CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+        message(FATAL_ERROR "ENABLE_ASAN requires GCC or Clang")
+    endif()
+    add_compile_options(-fsanitize=address -fno-omit-frame-pointer -O1)
+    add_link_options(-fsanitize=address)
+endif()
+
+# UndefinedBehaviorSanitizer (UBSan)
+option(ENABLE_UBSAN "Enable UndefinedBehaviorSanitizer (GCC/Clang)" OFF)
+if(ENABLE_UBSAN)
+    if(NOT CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+        message(FATAL_ERROR "ENABLE_UBSAN requires GCC or Clang")
+    endif()
+    add_compile_options(-fsanitize=undefined)
+    add_link_options(-fsanitize=undefined)
+endif()
+
+# Export compile_commands.json for clangd / IDE support
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # -----------------------------------------------------------------
 # Core library (shared between the main executable and test suites)
 # -----------------------------------------------------------------
@@ -31,6 +64,16 @@ target_include_directories(lib_core PUBLIC src)
 # -----------------------------------------------------------------
 add_executable(library src/main.c)
 target_link_libraries(library PRIVATE lib_core)
+target_compile_definitions(library PRIVATE
+    PROJECT_VERSION="${PROJECT_VERSION}"
+)
+
+# -----------------------------------------------------------------
+# Install target — `cmake --install build` or `make install`
+# -----------------------------------------------------------------
+include(GNUInstallDirs)
+install(TARGETS library RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(DIRECTORY data/ DESTINATION ${CMAKE_INSTALL_DATADIR}/c-library-system)
 
 # -----------------------------------------------------------------
 # Unit tests — Unity fetched from GitHub at configure time
@@ -49,7 +92,7 @@ if(BUILD_TESTS)
 
     enable_testing()
 
-    foreach(suite library user librarian)
+    foreach(suite library user librarian utility)
         add_executable(test_${suite} tests/test_${suite}.c)
         target_include_directories(test_${suite} PRIVATE src)
         target_link_libraries(test_${suite} PRIVATE lib_core unity)
