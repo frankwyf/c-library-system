@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- **`test_utility.c`** — 10 unit tests covering `util_trim_newline` edge cases.
+- **5 edge-case tests** for `test_library.c` (single book, multiple blanks, no trailing newline, orphan author, Windows line endings).
+- **5 edge-case tests** for `test_librarian.c` (long strings, empty strings, shift verification, add-remove-add cycle).
+- **5 edge-case tests** for `test_user.c` (borrow-return-borrow, fill & drain, middle compaction, boundary indices).
+- **CI: Windows** — build & test on `windows-latest` with MSVC.
+- **CI: Code coverage** — gcov + lcov with Codecov upload.
+- **CI: Valgrind** — full memory-leak check for all test suites.
+- **CI: AddressSanitizer + UBSan** — runtime memory-error detection.
+- **CI: clang-format** — formatting gate (dry-run `--Werror`).
+- **CI: Dependabot** — auto-PR for GitHub Actions version bumps.
+- **CI: Multi-platform release** — Linux + macOS + Windows binaries on version tags.
+- **CMake options**: `ENABLE_COVERAGE`, `ENABLE_ASAN`, `ENABLE_UBSAN`.
+- **Makefile targets**: `test`, `coverage`, `format`, `format-check`.
+- **Dockerfile** — multi-stage (builder → test → runtime) with minimal footprint.
+- **`.clang-format`** — LLVM-based style rules (4-space indent, 80-col limit).
+- **`.editorconfig`** — cross-editor indent / charset / EOL settings.
+- **`.dockerignore`** — lean Docker build context.
+- **`codecov.yml`** — Codecov coverage thresholds and ignore rules.
+- **`.github/dependabot.yml`** — weekly action-version update checks.
+- **`.github/ISSUE_TEMPLATE/bug_report.yml`** — structured bug report form.
+- **`.github/ISSUE_TEMPLATE/feature_request.yml`** — structured feature request form.
+- **`.github/PULL_REQUEST_TEMPLATE.md`** — PR checklist.
+- **`SECURITY.md`** — vulnerability disclosure policy.
+- **`docs/RELEASE.md`** — release process guide for maintainers.
+- **`scripts/install-hooks.sh`** — installs pre-commit clang-format hook.
+
+### Changed
+
+- `CONTRIBUTING.md` expanded with dev-environment table, coverage/ASan/hook instructions, and PR guidelines.
+- `README.md` updated with Codecov badge, coverage section, and revised project tree.
+- `clib.json` regenerated with full `src` listing and keyword metadata.
+
+---
+
 ## [1.0.0] – 2026-06-30
 
 ### Added
@@ -33,4 +71,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Library functions return `LIB_OK` / `LIB_ERR` instead of calling `exit()` directly.
 - Removed all personally identifiable information (student IDs, names, dates) from source code.
 
+[Unreleased]: https://github.com/frankwyf/c-library-system/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/frankwyf/c-library-system/releases/tag/v1.0.0

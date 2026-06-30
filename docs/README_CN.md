@@ -1,6 +1,7 @@
 # C 图书馆管理系统
 
 [![CI](https://github.com/frankwyf/c-library-system/actions/workflows/ci.yml/badge.svg)](https://github.com/frankwyf/c-library-system/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/frankwyf/c-library-system/branch/master/graph/badge.svg)](https://codecov.io/gh/frankwyf/c-library-system)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
 [![C Standard](https://img.shields.io/badge/C-C99-blue.svg)](https://en.wikipedia.org/wiki/C99)
 
@@ -74,6 +75,21 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
+### 生成测试覆盖率报告（仅 Linux / macOS，GCC/Clang）
+
+```bash
+make coverage          # 自动编译+运行测试+生成 HTML 报告
+# 报告位于 coverage-html/index.html
+```
+
+### 使用 AddressSanitizer 检测内存错误
+
+```bash
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -DENABLE_ASAN=ON
+cmake --build build --parallel
+ctest --test-dir build --output-on-failure
+```
+
 ---
 
 ## 图书数据文件格式
@@ -96,7 +112,13 @@ I, Robot
 
 ```
 c-library-system/
-├── .github/workflows/ci.yml     GitHub Actions CI/CD 流程
+├── .github/
+│   ├── workflows/ci.yml             GitHub Actions CI/CD（8 个作业）
+│   ├── ISSUE_TEMPLATE/              Bug 报告 / 功能建议模板
+│   ├── PULL_REQUEST_TEMPLATE.md     PR 检查清单
+│   ├── CODEOWNERS                   代码审查分配
+│   ├── dependabot.yml               依赖自动更新
+│   └── FUNDING.yml                  赞助信息
 ├── src/
 │   ├── structures.h             核心数据结构（Book、User、Library）
 │   ├── main.c                   程序入口
@@ -105,15 +127,25 @@ c-library-system/
 │   ├── user.[ch]                用户操作（借阅/归还/列表）
 │   └── utility.[ch]             输入辅助函数
 ├── tests/
-│   ├── test_library.c           单元测试：library 模块（7 个）
-│   ├── test_user.c              单元测试：user 模块（10 个）
-│   └── test_librarian.c         单元测试：librarian 模块（9 个）
-├── data/books.txt               示例图书数据
-├── docs/                        多语言文档
-├── Makefile                     GNU Make 构建脚本
-├── CMakeLists.txt               CMake 构建脚本 + 测试
+│   ├── test_library.c           单元测试：library 模块（12 个）
+│   ├── test_user.c              单元测试：user 模块（15 个）
+│   ├── test_librarian.c         单元测试：librarian 模块（14 个）
+│   └── test_utility.c           单元测试：utility 模块（10 个）
+├── scripts/
+│   ├── install-hooks.sh         安装 pre-commit 格式检查钩子
+│   └── smoke-test.sh            集成冒烟测试脚本
+├── data/books.txt               示例图书数据（12 本）
+├── docs/                        多语言文档 + 发布指南
+├── .clang-format                代码格式规则
+├── .editorconfig                编辑器缩进/换行设置
+├── Dockerfile                   多阶段 Docker 构建
+├── Makefile                     GNU Make（含 test/coverage/format 目标）
+├── CMakeLists.txt               CMake 构建 + 测试 + 覆盖率 + 消毒器
+├── clib.json                    clib 包管理描述
+├── codecov.yml                  Codecov 阈值配置
 ├── LICENSE                      MIT 许可证
 ├── CONTRIBUTING.md              贡献指南
+├── SECURITY.md                  安全漏洞上报策略
 └── CHANGELOG.md                 版本历史
 ```
 

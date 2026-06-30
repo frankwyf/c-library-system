@@ -1,6 +1,7 @@
 # C 図書館管理システム
 
 [![CI](https://github.com/frankwyf/c-library-system/actions/workflows/ci.yml/badge.svg)](https://github.com/frankwyf/c-library-system/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/frankwyf/c-library-system/branch/master/graph/badge.svg)](https://codecov.io/gh/frankwyf/c-library-system)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
 [![C Standard](https://img.shields.io/badge/C-C99-blue.svg)](https://en.wikipedia.org/wiki/C99)
 
@@ -74,6 +75,21 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
+### カバレッジレポートの生成（Linux / macOS、GCC/Clang のみ）
+
+```bash
+make coverage          # ビルド → テスト → HTML レポート生成
+# レポートは coverage-html/index.html
+```
+
+### AddressSanitizer でメモリエラーを検出
+
+```bash
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -DENABLE_ASAN=ON
+cmake --build build --parallel
+ctest --test-dir build --output-on-failure
+```
+
 ---
 
 ## 書籍データファイルの形式
@@ -96,7 +112,13 @@ I, Robot
 
 ```
 c-library-system/
-├── .github/workflows/ci.yml     GitHub Actions CI/CD
+├── .github/
+│   ├── workflows/ci.yml             GitHub Actions CI/CD（8 ジョブ）
+│   ├── ISSUE_TEMPLATE/              バグ報告 / 機能リクエスト テンプレート
+│   ├── PULL_REQUEST_TEMPLATE.md     PR チェックリスト
+│   ├── CODEOWNERS                   コードレビュー担当割り当て
+│   ├── dependabot.yml               依存関係自動更新
+│   └── FUNDING.yml                  スポンサー情報
 ├── src/
 │   ├── structures.h             コアデータ構造（Book・User・Library）
 │   ├── main.c                   エントリポイント
@@ -105,15 +127,25 @@ c-library-system/
 │   ├── user.[ch]                ユーザー操作（借用 / 返却 / 一覧）
 │   └── utility.[ch]             入力ユーティリティ
 ├── tests/
-│   ├── test_library.c           ユニットテスト: library モジュール（7 件）
-│   ├── test_user.c              ユニットテスト: user モジュール（10 件）
-│   └── test_librarian.c         ユニットテスト: librarian モジュール（9 件）
-├── data/books.txt               サンプルデータ
-├── docs/                        多言語ドキュメント
-├── Makefile                     GNU Make ビルド
-├── CMakeLists.txt               CMake ビルド + テスト
+│   ├── test_library.c           ユニットテスト: library（12 件）
+│   ├── test_user.c              ユニットテスト: user（15 件）
+│   ├── test_librarian.c         ユニットテスト: librarian（14 件）
+│   └── test_utility.c           ユニットテスト: utility（10 件）
+├── scripts/
+│   ├── install-hooks.sh         pre-commit フォーマットフック
+│   └── smoke-test.sh            統合スモークテスト
+├── data/books.txt               サンプルデータ（12 冊）
+├── docs/                        多言語ドキュメント + リリースガイド
+├── .clang-format                コードフォーマットルール
+├── .editorconfig                エディタ設定
+├── Dockerfile                   マルチステージ Docker ビルド
+├── Makefile                     GNU Make（test/coverage/format 対応）
+├── CMakeLists.txt               CMake + テスト + カバレッジ + サニタイザ
+├── clib.json                    clib パッケージ記述
+├── codecov.yml                  Codecov 設定
 ├── LICENSE                      MIT ライセンス
 ├── CONTRIBUTING.md              コントリビューションガイド
+├── SECURITY.md                  脆弱性報告ポリシー
 └── CHANGELOG.md                 変更履歴
 ```
 
