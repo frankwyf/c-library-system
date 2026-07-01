@@ -1,5 +1,5 @@
 # ---- Build stage ----
-FROM gcc:13 AS builder
+FROM gcc:16 AS builder
 
 LABEL org.opencontainers.image.source="https://github.com/frankwyf/c-library-system"
 LABEL org.opencontainers.image.description="C Library Management System"
